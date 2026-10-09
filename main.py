@@ -1,9 +1,8 @@
-#Henrique Soares Serra - RM 573618
+#Henrique Soares Serra-RM573618
 
 import os
 import csv
 import json
-import openpyxl
 
 def cadastrar_alunos():
     novos = []
@@ -17,7 +16,14 @@ def cadastrar_alunos():
         cp1 = float(input("CP1: "))
         cp2 = float(input("CP2: "))
         cp3 = float(input("CP3: "))
-        media = (cp1 + cp2 + cp3 - min(cp1, cp2, cp3)) / 2
+
+        menor = cp1
+        if cp2 < menor:
+            menor = cp2
+        if cp3 < menor:
+            menor = cp3
+        media = (cp1 + cp2 + cp3 - menor) / 2
+
         aluno = {"rm": rm, "nome": nome, "cp1": cp1, "cp2": cp2, "cp3": cp3, "media": media}
         novos.append(aluno)
     if novos:
@@ -54,16 +60,13 @@ def gravar_json(novos):
         json.dump(todos, arq, ensure_ascii=False, indent=4)
 
 def gravar_excel(novos):
-    if os.path.exists("alunos.xlsx"):
-        wb = openpyxl.load_workbook("alunos.xlsx")
-        ws = wb.active
-    else:
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.append(["RM", "Nome", "CP1", "CP2", "CP3", "Media"])
-    for aluno in novos:
-        ws.append([aluno["rm"], aluno["nome"], aluno["cp1"], aluno["cp2"], aluno["cp3"], aluno["media"]])
-    wb.save("alunos.xlsx")
+    existe = os.path.exists("alunos.xlsx")
+    with open("alunos.xlsx", "a", newline="", encoding="utf-8") as arq:
+        w = csv.writer(arq, delimiter=";")
+        if not existe:
+            w.writerow(["RM", "Nome", "CP1", "CP2", "CP3", "Media"])
+        for aluno in novos:
+            w.writerow([aluno["rm"], aluno["nome"], aluno["cp1"], aluno["cp2"], aluno["cp3"], aluno["media"]])
 
 def ler_txt():
     try:
@@ -105,16 +108,16 @@ def ler_json():
 
 def ler_excel():
     try:
-        wb = openpyxl.load_workbook("alunos.xlsx")
+        with open("alunos.xlsx", encoding="utf-8") as arq:
+            linhas = list(csv.reader(arq, delimiter=";"))
     except FileNotFoundError:
         print("\nalunos.xlsx ainda não existe. Cadastre alunos antes.")
         return
-    ws = wb.active
     print("\n--- alunos.xlsx ---")
-    for linha in ws.iter_rows(min_row=2, values_only=True):
-        if linha[0] is None:
-            continue
-        print(f"RM: {linha[0]} | Nome: {linha[1]} | CP1: {linha[2]} | CP2: {linha[3]} | CP3: {linha[4]} | Media: {linha[5]}")
+    for linha in linhas:
+        if len(linha) == 6:
+            rm, nome, cp1, cp2, cp3, media = linha
+            print(f"RM: {rm} | Nome: {nome} | CP1: {cp1} | CP2: {cp2} | CP3: {cp3} | Media: {media}")
 
 def ler_arquivo():
     while True:
