@@ -4,18 +4,59 @@ import os
 import csv
 import json
 
+def ler_nome():
+    while True:
+        nome = input("Nome: ").strip()
+        if nome == "":
+            print("Nome não pode ser vazio.")
+            continue
+        valido = True
+        for letra in nome:
+            if not (letra.isalpha() or letra == " "):
+                valido = False
+                break
+        if valido:
+            return nome
+        print("Nome inválido. Digite apenas letras.")
+
+def ler_nota(texto):
+    while True:
+        valor = input(texto).strip()
+        if valor == "":
+            print("Nota não pode ser vazia.")
+            continue
+        try:
+            nota = float(valor)
+            return nota
+        except ValueError:
+            print("Nota inválida. Digite apenas números, usando ponto.")
+
+def ler_rm():
+    while True:
+        rm = input("RM: ").strip()
+        if rm == "":
+            return rm
+        valido = True
+        for letra in rm:
+            if not letra.isalnum():
+                valido = False
+                break
+        if valido:
+            return rm
+        print("RM inválido. Digite apenas letras e números.")
+
 def cadastrar_alunos():
     novos = []
     print("\n--- CADASTRO DE ALUNOS ---")
     print("Digite RM vazio para encerrar.")
     while True:
-        rm = input("RM: ").strip()
+        rm = ler_rm()
         if rm == "":
             break
-        nome = input("Nome: ").strip()
-        cp1 = float(input("CP1: "))
-        cp2 = float(input("CP2: "))
-        cp3 = float(input("CP3: "))
+        nome = ler_nome()
+        cp1 = ler_nota("CP1: ")
+        cp2 = ler_nota("CP2: ")
+        cp3 = ler_nota("CP3: ")
 
         menor = cp1
         if cp2 < menor:
@@ -152,6 +193,9 @@ def pesquisar_aluno():
     with open("alunos.json", encoding="utf-8") as arq:
         alunos = json.load(arq)
     rm = input("\nDigite o RM do aluno: ").strip()
+    if rm == "":
+        print("Digite um RM para pesquisar.")
+        return
     encontrado = False
     for aluno in alunos:
         if aluno["rm"] == rm:
